@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{ title|default(t.title_alert, true) }}</title>
+  <!--[if mso]>
+  <xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+  <![endif]-->
+  <style>
+    @media only screen and (max-width: 620px) {
+      .es-wrapper { width: 100% !important; }
+      .es-pad { padding-left: 22px !important; padding-right: 22px !important; }
+      .es-title { font-size: 19px !important; line-height: 27px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; width:100%; background-color:#f4f5f7; -webkit-font-smoothing:antialiased;">
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0;">{{ title }}</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f5f7;">
+    <tr>
+      <td align="center" style="padding:28px 12px;">
+
+        <table role="presentation" class="es-wrapper" width="560" cellpadding="0" cellspacing="0" border="0" style="width:560px; max-width:560px; background-color:#ffffff; border:1px solid #e1e4e8; border-radius:6px; overflow:hidden;">
+
+          <!-- Barre d'état colorée en haut -->
+          <tr>
+            <td bgcolor="{{ accent_color }}" style="background-color:{{ accent_color }}; height:4px; line-height:4px; font-size:0;">&nbsp;</td>
+          </tr>
+
+          <!-- Ligne de statut : pastille + intitulé + société -->
+          <tr>
+            <td class="es-pad" style="padding:16px 26px; border-bottom:1px solid #eef0f2;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="left" valign="middle" width="26">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center" valign="middle" bgcolor="{{ accent_color }}"
+                            style="width:20px; height:20px; background-color:{{ accent_color }}; border-radius:10px; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:20px; color:#ffffff; font-weight:700; text-align:center;">!</td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td align="left" valign="middle" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:1.6px; text-transform:uppercase; color:#57606a; font-weight:700;">
+                    {{ t.title_alert }}
+                  </td>
+                  <td align="right" valign="middle">
+                    {% if logo_url %}
+                    <img src="{{ logo_url }}" alt="{{ company_name|default(t.logo_alt, true) }}" width="74" style="display:block; max-width:74px; height:auto; border:0; outline:none; text-decoration:none;">
+                    {% elif company_name %}
+                    <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:12px; color:#8b949e;">{{ company_name }}</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Titre -->
+          <tr>
+            <td class="es-pad" align="left" style="padding:24px 26px 0 26px;">
+              <h1 class="es-title" style="margin:0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:20px; line-height:28px; font-weight:600; color:#1f2328;">
+                {{ title }}
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Corps, dense et direct -->
+          <tr>
+            <td class="es-pad" align="left" style="padding:14px 26px 0 26px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; line-height:25px; color:#424a53;">
+              {{ body }}
+            </td>
+          </tr>
+
+          <!-- Encadré d'attention -->
+          <tr>
+            <td class="es-pad" align="left" style="padding:18px 26px 0 26px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td bgcolor="#f6f8fa" style="background-color:#f6f8fa; border-left:3px solid {{ accent_color }}; border-radius:0 4px 4px 0; padding:12px 16px; font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace; font-size:12.5px; line-height:21px; color:#57606a;">
+                    {{ t.alert_note }}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Blocs optionnels : vides si les champs ne sont pas remplis -->
+          {{ video_block }}
+          {{ cta_block }}
+          <!-- Signature -->
+          {% if signature %}
+          <tr>
+            <td class="es-pad" align="left" style="padding:20px 26px 0 26px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13.5px; line-height:22px; color:#57606a;">
+              {{ signature }}
+            </td>
+          </tr>
+          {% endif %}
+
+          <tr><td style="height:24px; line-height:24px; font-size:0;">&nbsp;</td></tr>
+
+          <!-- Pied de page -->
+          <tr>
+            <td class="es-pad" align="left" bgcolor="#f6f8fa" style="background-color:#f6f8fa; padding:14px 26px; border-top:1px solid #eef0f2; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:18px; color:#8b949e;">
+              {{ social_block }}
+              {% if company_name %}{{ company_name }} &middot; {% endif %}&copy; {{ year }}
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{ title|default(t.title_thanks, true) }}</title>
+  <!--[if mso]>
+  <xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+  <![endif]-->
+  <style>
+    @media only screen and (max-width: 620px) {
+      .es-wrapper { width: 100% !important; }
+      .es-pad { padding-left: 28px !important; padding-right: 28px !important; }
+      .es-word { font-size: 40px !important; line-height: 48px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; width:100%; background-color:#f6f1e9; -webkit-font-smoothing:antialiased;">
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0;">{{ title }}</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f6f1e9;">
+    <tr>
+      <td align="center" style="padding:44px 14px;">
+
+        <table role="presentation" class="es-wrapper" width="580" cellpadding="0" cellspacing="0" border="0" style="width:580px; max-width:580px; background-color:#fffdfa; border:1px solid #ece3d6;">
+
+          <!-- Pas de bandeau : un logo discret, puis le mot « merci » -->
+          {% if logo_url %}
+          <tr>
+            <td align="center" style="padding:40px 40px 0 40px;">
+              <img src="{{ logo_url }}" alt="{{ company_name|default(t.logo_alt, true) }}" width="86" style="display:block; margin:0 auto; max-width:86px; height:auto; border:0; outline:none; text-decoration:none;">
+            </td>
+          </tr>
+          {% endif %}
+
+          <tr>
+            <td class="es-pad" align="center" style="padding:{% if logo_url %}26px{% else %}48px{% endif %} 48px 0 48px;">
+              <div class="es-word" style="font-family:Georgia,'Times New Roman',serif; font-size:46px; line-height:54px; font-style:italic; color:{{ accent_color }};">
+                {{ t.title_thanks }}
+              </div>
+            </td>
+          </tr>
+
+          <!-- Ornement : trois points -->
+          <tr>
+            <td align="center" style="padding:22px 40px 0 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                <tr>
+                  <td style="padding:0 5px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="{{ accent_color }}" style="width:5px; height:5px; background-color:{{ accent_color }}; border-radius:3px; line-height:5px; font-size:0;">&nbsp;</td></tr></table></td>
+                  <td style="padding:0 5px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#d8cbb6" style="width:5px; height:5px; background-color:#d8cbb6; border-radius:3px; line-height:5px; font-size:0;">&nbsp;</td></tr></table></td>
+                  <td style="padding:0 5px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#d8cbb6" style="width:5px; height:5px; background-color:#d8cbb6; border-radius:3px; line-height:5px; font-size:0;">&nbsp;</td></tr></table></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Titre du message -->
+          <tr>
+            <td class="es-pad" align="center" style="padding:24px 56px 0 56px;">
+              <h1 style="margin:0; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:19px; line-height:28px; font-weight:600; color:#4a4034; letter-spacing:0.2px;">
+                {{ title }}
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Corps centré -->
+          <tr>
+            <td class="es-pad" align="center" style="padding:18px 60px 0 60px; font-family:Georgia,'Times New Roman',serif; font-size:16px; line-height:29px; color:#6b5f4f; text-align:center;">
+              {{ body }}
+            </td>
+          </tr>
+
+          <!-- Note -->
+          <tr>
+            <td class="es-pad" align="center" style="padding:20px 60px 0 60px; font-family:Georgia,'Times New Roman',serif; font-size:14px; line-height:24px; font-style:italic; color:#9a8b76;">
+              {{ t.thanks_note }}
+            </td>
+          </tr>
+
+          <!-- Blocs optionnels : vides si les champs ne sont pas remplis -->
+          {{ video_block }}
+          {{ cta_block }}
+          <!-- Signature manuscrite -->
+          {% if signature %}
+          <tr>
+            <td class="es-pad" align="center" style="padding:30px 56px 0 56px; font-family:Georgia,'Times New Roman',serif; font-size:15px; line-height:25px; color:#4a4034; text-align:center;">
+              {{ signature }}
+            </td>
+          </tr>
+          {% endif %}
+
+          <tr><td style="height:40px; line-height:40px; font-size:0;">&nbsp;</td></tr>
+
+          <!-- Pied de page -->
+          <tr>
+            <td align="center" style="padding:20px 40px; border-top:1px solid #ece3d6; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:19px; color:#a89679; letter-spacing:0.6px;">
+              {{ social_block }}
+              {% if company_name %}<span style="color:#6b5f4f; text-transform:uppercase; letter-spacing:2px;">{{ company_name }}</span><br>{% endif %}
+              &copy; {{ year }} - {{ t.rights_reserved }}
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{ title|default(t.title_promotion, true) }}</title>
+  <!--[if mso]>
+  <xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+  <![endif]-->
+  <style>
+    @media only screen and (max-width: 620px) {
+      .es-wrapper { width: 100% !important; }
+      .es-pad { padding-left: 22px !important; padding-right: 22px !important; }
+      .es-shout { font-size: 40px !important; line-height: 46px !important; }
+      .es-banner { padding: 30px 20px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; width:100%; background-color:#111827; -webkit-font-smoothing:antialiased;">
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0;">{{ title }}</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#111827;">
+    <tr>
+      <td align="center" style="padding:22px 12px;">
+
+        <table role="presentation" class="es-wrapper" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#ffffff; border-radius:6px; overflow:hidden;">
+
+          <!-- Bandeau d'accroche : couleur pleine, intitule en capitales -->
+          <tr>
+            <td align="center" bgcolor="{{ accent_color }}" style="background-color:{{ accent_color }}; padding:14px 20px;">
+              <div style="font-family:'Arial Black',Arial,Helvetica,sans-serif; font-size:13px; letter-spacing:5px; text-transform:uppercase; color:#ffffff; font-weight:700;">
+                {{ t.title_promotion }}
+              </div>
+            </td>
+          </tr>
+
+          <!-- Logo -->
+          {% if logo_url %}
+          <tr>
+            <td align="center" style="padding:26px 24px 0 24px;">
+              <img src="{{ logo_url }}" alt="{{ company_name|default(t.logo_alt, true) }}" width="130" style="display:block; margin:0 auto; max-width:130px; height:auto; border:0; outline:none; text-decoration:none;">
+            </td>
+          </tr>
+          {% endif %}
+
+          <!-- Titre geant : c'est ici que vit le pourcentage ou le prix -->
+          <tr>
+            <td class="es-pad" align="center" style="padding:30px 36px 0 36px;">
+              <h1 class="es-shout" style="margin:0; font-family:'Arial Black',Arial,Helvetica,sans-serif; font-size:50px; line-height:56px; font-weight:900; color:#111827; letter-spacing:-1.5px; text-transform:uppercase;">
+                {{ title }}
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Soulignement epais -->
+          <tr>
+            <td align="center" style="padding:18px 36px 0 36px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                <tr><td bgcolor="{{ accent_color }}" style="width:90px; height:7px; background-color:{{ accent_color }}; line-height:7px; font-size:0;">&nbsp;</td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Corps -->
+          <tr>
+            <td class="es-pad" align="center" style="padding:24px 44px 6px 44px; font-family:Arial,Helvetica,sans-serif; font-size:17px; line-height:27px; color:#374151; text-align:center;">
+              {{ body }}
+            </td>
+          </tr>
+
+          <!-- Bande d'appel a l'action -->
+          <tr>
+            <td align="center" style="padding:16px 28px 4px 28px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%" style="max-width:420px;">
+                <tr>
+                  <td align="center" bgcolor="{{ accent_color }}" style="background-color:{{ accent_color }}; border-radius:4px; padding:18px 28px; font-family:'Arial Black',Arial,Helvetica,sans-serif; font-size:19px; font-weight:900; line-height:24px; color:#ffffff; letter-spacing:1px; text-transform:uppercase;">
+                    {% if company_name %}{{ company_name }}{% else %}{{ t.title_promotion }}{% endif %}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Mention d'urgence -->
+          <tr>
+            <td align="center" style="padding:14px 36px 0 36px; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:19px; color:#9ca3af; text-transform:uppercase; letter-spacing:1px;">
+              {{ t.promo_note }}
+            </td>
+          </tr>
+
+          <!-- Blocs optionnels : vides si les champs ne sont pas remplis -->
+          {{ video_block }}
+          {{ cta_block }}
+          <!-- Signature -->
+          {% if signature %}
+          <tr>
+            <td class="es-pad" align="center" style="padding:26px 44px 30px 44px; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:23px; color:#4b5563; text-align:center;">
+              {{ signature }}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td style="height:30px; line-height:30px; font-size:0;">&nbsp;</td></tr>
+          {% endif %}
+
+          <!-- Pied de page -->
+          <tr>
+            <td align="center" bgcolor="#111827" style="background-color:#111827; padding:20px 28px; font-family:Arial,Helvetica,sans-serif; font-size:11px; line-height:19px; color:#9ca3af;">
+              {{ social_block }}
+              {% if company_name %}<strong style="color:#ffffff; letter-spacing:1px; text-transform:uppercase;">{{ company_name }}</strong><br>{% endif %}
+              &copy; {{ year }} - {{ t.rights_reserved }}
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

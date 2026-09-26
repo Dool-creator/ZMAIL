@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{ title|default(t.title_announcement, true) }}</title>
+  <!--[if mso]>
+  <xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+  <![endif]-->
+  <style>
+    @media only screen and (max-width: 620px) {
+      .es-wrapper { width: 100% !important; }
+      .es-pad { padding-left: 26px !important; padding-right: 26px !important; }
+      .es-hero { font-size: 34px !important; line-height: 42px !important; }
+      .es-heroPad { padding: 46px 26px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; width:100%; background-color:#ffffff; -webkit-font-smoothing:antialiased;">
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0;">{{ title }}</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;">
+    <tr>
+      <td align="center" style="padding:0;">
+
+        <table role="presentation" class="es-wrapper" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#ffffff;">
+
+          <!-- Hero sombre pleine largeur, façon page de magazine -->
+          <tr>
+            <td class="es-heroPad" align="center" bgcolor="#0b0f19" style="background-color:#0b0f19; padding:62px 44px 56px 44px;">
+              {% if logo_url %}
+              <img src="{{ logo_url }}" alt="{{ company_name|default(t.logo_alt, true) }}" width="108" style="display:block; margin:0 auto 30px auto; max-width:108px; height:auto; border:0; outline:none; text-decoration:none;">
+              {% endif %}
+              <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:5px; text-transform:uppercase; color:{{ accent_color }}; font-weight:700;">
+                {{ t.title_announcement }}
+              </div>
+              <h1 class="es-hero" style="margin:20px 0 0 0; font-family:Georgia,'Times New Roman',serif; font-size:42px; line-height:52px; font-weight:400; color:#ffffff; letter-spacing:-0.6px;">
+                {{ title }}
+              </h1>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin-top:28px;">
+                <tr><td bgcolor="{{ accent_color }}" style="width:48px; height:3px; background-color:{{ accent_color }}; line-height:3px; font-size:0;">&nbsp;</td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Chapô et corps, colonne étroite et aérée -->
+          <tr>
+            <td class="es-pad" align="left" style="padding:52px 64px 0 64px; font-family:Georgia,'Times New Roman',serif; font-size:17px; line-height:30px; color:#1f2937;">
+              {{ body }}
+            </td>
+          </tr>
+
+          <!-- Filet de séparation -->
+          <tr>
+            <td class="es-pad" style="padding:26px 64px 0 64px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr><td style="border-top:1px solid #e5e7eb; height:1px; line-height:1px; font-size:0;">&nbsp;</td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Blocs optionnels : vides si les champs ne sont pas remplis -->
+          {{ video_block }}
+          {{ cta_block }}
+          <!-- Signature en bloc éditorial -->
+          {% if signature %}
+          <tr>
+            <td class="es-pad" align="left" style="padding:24px 64px 0 64px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:14px; line-height:23px; color:#4b5563;">
+              {{ signature }}
+            </td>
+          </tr>
+          {% endif %}
+
+          <tr><td style="height:46px; line-height:46px; font-size:0;">&nbsp;</td></tr>
+
+          <!-- Pied de page sobre -->
+          <tr>
+            <td align="center" style="padding:24px 44px 44px 44px; border-top:1px solid #f3f4f6; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:19px; color:#9ca3af; letter-spacing:0.4px;">
+              {{ social_block }}
+              {% if company_name %}<span style="color:#111827; text-transform:uppercase; letter-spacing:2.5px; font-weight:700;">{{ company_name }}</span><br>{% endif %}
+              &copy; {{ year }} - {{ t.rights_reserved }}
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

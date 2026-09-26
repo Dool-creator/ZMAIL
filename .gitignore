@@ -1,0 +1,30 @@
+# Données personnelles. Recréés vides au premier démarrage par
+# ensure_directories() dans main.py : un clone neuf fonctionne sans eux.
+data/config.json
+data/contacts.json
+# Fichiers temporaires des écritures atomiques de write_json().
+data/*.tmp
+
+# Fichiers téléversés (logos, pièces jointes). Le dossier reste suivi.
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Notes de développement internes, non publiées.
+PROJECT_NOTES.md
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environnements virtuels
+.venv/
+venv/
+
+# Dossiers d'éditeur
+.vscode/
+.idea/
+
+# Fichiers système
+.DS_Store
+Thumbs.db

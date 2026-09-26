@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{ title|default(t.title_invitation, true) }}</title>
+  <!--[if mso]>
+  <xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+  <![endif]-->
+  <style>
+    @media only screen and (max-width: 620px) {
+      .es-wrapper { width: 100% !important; }
+      .es-pad { padding-left: 24px !important; padding-right: 24px !important; }
+      .es-title { font-size: 28px !important; line-height: 36px !important; }
+      .es-header { padding: 36px 24px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; width:100%; background-color:#0f172a; -webkit-font-smoothing:antialiased;">
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0;">{{ title }}</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f172a;">
+    <tr>
+      <td align="center" style="padding:28px 12px;">
+
+        <table role="presentation" class="es-wrapper" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#ffffff; border-radius:14px; overflow:hidden;">
+
+          <!-- En-tête dégradé (repli : couleur unie sur Outlook) -->
+          <tr>
+            <td class="es-header" align="center" bgcolor="{{ accent_color }}"
+                style="background-color:{{ accent_color }}; background-image:linear-gradient(135deg, {{ accent_color }} 0%, #0f172a 100%); padding:44px 32px 40px 32px;">
+              {% if logo_url %}
+              <img src="{{ logo_url }}" alt="{{ company_name|default(t.logo_alt, true) }}" width="140" style="display:block; margin:0 auto 20px auto; max-width:140px; height:auto; border:0; outline:none; text-decoration:none;">
+              {% endif %}
+              <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:#ffffff; opacity:0.85;">
+                {{ t.invitation_label }}
+              </div>
+              <h1 class="es-title" style="margin:14px 0 0 0; font-family:Georgia,'Times New Roman',serif; font-size:34px; line-height:44px; font-weight:400; color:#ffffff;">
+                {{ title }}
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Ornement -->
+          <tr>
+            <td align="center" style="padding:30px 32px 0 32px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                <tr>
+                  <td style="width:26px; border-top:1px solid #e2e8f0; height:1px; line-height:1px; font-size:0;">&nbsp;</td>
+                  <td style="padding:0 10px; font-family:Georgia,serif; font-size:16px; color:{{ accent_color }}; line-height:16px;">&#10022;</td>
+                  <td style="width:26px; border-top:1px solid #e2e8f0; height:1px; line-height:1px; font-size:0;">&nbsp;</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Corps centré -->
+          <tr>
+            <td class="es-pad" align="center" style="padding:22px 48px 8px 48px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:16px; line-height:27px; color:#334155; text-align:center;">
+              {{ body }}
+            </td>
+          </tr>
+
+          <!-- Bloc mise en avant (style call-to-action) -->
+          <tr>
+            <td align="center" style="padding:18px 32px 6px 32px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
+                <tr>
+                  <td align="center" bgcolor="{{ accent_color }}" style="background-color:{{ accent_color }}; border-radius:999px; padding:14px 34px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; line-height:20px; color:#ffffff; letter-spacing:0.4px;">
+                    {% if company_name %}{{ company_name }}{% else %}{{ t.invitation_cta }}{% endif %}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Blocs optionnels : vides si les champs ne sont pas remplis -->
+          {{ video_block }}
+          {{ cta_block }}
+          <!-- Signature -->
+          {% if signature %}
+          <tr>
+            <td class="es-pad" align="center" style="padding:26px 48px 34px 48px; font-family:Georgia,'Times New Roman',serif; font-size:15px; line-height:24px; color:#475569; text-align:center;">
+              {{ signature }}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td style="height:30px; line-height:30px; font-size:0;">&nbsp;</td></tr>
+          {% endif %}
+
+          <!-- Pied de page élégant -->
+          <tr>
+            <td align="center" bgcolor="#0f172a" style="background-color:#0f172a; padding:20px 32px; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:11px; line-height:19px; color:#94a3b8; letter-spacing:0.5px;">
+              {{ social_block }}
+              {% if company_name %}<span style="color:#e2e8f0; text-transform:uppercase; letter-spacing:2px;">{{ company_name }}</span><br>{% endif %}
+              &copy; {{ year }} - {{ t.invitation_closing }}
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

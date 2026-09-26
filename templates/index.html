@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="{{ language }}" data-lang="{{ language }}"
+      data-ui-accent="{{ ui_accent_color }}" style="--accent-color: {{ ui_accent_color }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zm@il</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css?v={{ asset_version }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128231;</text></svg>">
+  <!-- Chargé avant app.js : la langue est appliquée dès le premier rendu. -->
+  <script src="/static/js/i18n.js?v={{ asset_version }}"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===================== BARRE LATÉRALE ===================== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">✉</div>
+      <div class="brand-text">
+        <strong data-i18n="brand.name">Zm@il</strong>
+        <span data-i18n="brand.tagline">Campagnes professionnelles</span>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="nav-item is-active" data-view="composer">
+        <span class="nav-icon">✎</span> <span data-i18n="nav.composer">Rédaction</span>
+      </button>
+      <button class="nav-item" data-view="contacts">
+        <span class="nav-icon">☰</span> <span data-i18n="nav.contacts">Contacts</span>
+        <span class="nav-badge" id="contactsBadge">0</span>
+      </button>
+      <button class="nav-item" data-view="templates">
+        <span class="nav-icon">▭</span> <span data-i18n="nav.templates">Modèles</span>
+      </button>
+      <button class="nav-item" data-view="settings">
+        <span class="nav-icon">⚙</span> <span data-i18n="nav.settings">Paramètres</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="account" id="accountCard">
+        <span class="status-dot" id="statusDot" data-i18n-title="sidebar.statusTitle"></span>
+        <div class="account-text">
+          <strong id="accountEmail" data-i18n="sidebar.notConfigured">Non configuré</strong>
+          <span id="accountServer" data-i18n="sidebar.openSettings">Ouvrez Paramètres pour commencer</span>
+        </div>
+      </div>
+      <p class="version" id="appVersion"></p>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTENU ===================== -->
+  <main class="main">
+
+    <!-- ------------------- 1. RÉDACTION ------------------- -->
+    <section class="view is-active" id="view-composer">
+      <header class="view-head">
+        <div>
+          <h1 data-i18n="composer.title">Rédaction</h1>
+          <p data-i18n="composer.subtitle">Composez votre e-mail et vérifiez le rendu en direct à droite.</p>
+        </div>
+        <div class="view-head-actions">
+          <button class="btn btn-ghost" id="resetBtn" type="button" data-i18n="composer.reset">Réinitialiser</button>
+        </div>
+      </header>
+
+      <div class="composer">
+
+        <!-- ---------- Panneau éditeur ---------- -->
+        <div class="panel editor">
+          <div class="panel-body">
+
+            <div class="field">
+              <label data-i18n="composer.from">Expéditeur</label>
+              <div class="from-box" id="fromBox">
+                <span class="from-avatar" id="fromAvatar">?</span>
+                <div>
+                  <strong id="fromName" data-i18n="sidebar.notConfigured">Non configuré</strong>
+                  <span id="fromEmail" data-i18n="composer.fromPlaceholder">Renseignez vos paramètres SMTP</span>
+                </div>
+                <button class="btn btn-mini" type="button" data-goto="settings" data-i18n="composer.edit">Modifier</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="recipientInput"><span data-i18n="composer.to">Destinataires</span> <span class="req">*</span></label>
+              <div class="recipients" id="recipientsBox">
+                <span class="chips" id="recipientChips"></span>
+                <input type="text" id="recipientInput" class="chip-input" autocomplete="off">
+                <div class="suggestions" id="suggestions" hidden></div>
+              </div>
+              <div class="field-row">
+                <select id="groupSelect" class="select-sm">
+                  <option value="" data-i18n="composer.addGroup">Ajouter un groupe…</option>
+                </select>
+                <button class="btn btn-mini" type="button" id="addAllBtn" data-i18n="composer.allContacts">Tous les contacts</button>
+                <button class="btn btn-mini btn-mini-danger" type="button" id="clearRecipientsBtn" data-i18n="composer.clear">Vider</button>
+                <span class="hint" id="recipientCount">0</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="subject"><span data-i18n="composer.subject">Sujet</span> <span class="req">*</span></label>
+              <input type="text" id="subject" maxlength="200"
+                     data-i18n-placeholder="composer.subjectPlaceholder" placeholder="Objet de votre e-mail">
+            </div>
+
+            <div class="field">
+              <label for="templateSelect" data-i18n="composer.template">Modèle</label>
+              <select id="templateSelect"></select>
+            </div>
+
+            <div class="field">
+              <div class="label-row">
+                <label data-i18n="composer.logo">Logo</label>
+                <div class="logo-modes" id="logoModes">
+                  <button class="seg is-active" type="button" data-logo-mode="url"
+                          data-i18n="composer.logoModeUrl">Adresse web</button>
+                  <button class="seg" type="button" data-logo-mode="upload"
+                          data-i18n="composer.logoModeUpload">Téléversement</button>
+                </div>
+              </div>
+
+              <!-- Mode « adresse web » : l'image est chargée par le client de messagerie. -->
+              <div id="logoUrlPane">
+                <input type="url" id="logoUrlInput" spellcheck="false"
+                       value="{{ logo_url }}"
+                       data-i18n-placeholder="composer.logoUrlPlaceholder"
+                       placeholder="https://exemple.com/logo.png">
+                <span class="hint" data-i18n="composer.logoUrlHint">L'image est chargée depuis le web : aucune pièce jointe dans l'e-mail.</span>
+              </div>
+
+              <!-- Mode « téléversement » : l'image part en pièce jointe intégrée (CID). -->
+              <div id="logoUploadPane" hidden>
+                <div class="upload-row">
+                  <button class="btn btn-soft" type="button" id="logoBtn">
+                    <span class="btn-icon">↑</span> <span data-i18n="composer.chooseLogo">Choisir un logo</span>
+                  </button>
+                  <input type="file" id="logoInput" accept="image/*" hidden>
+                  <div class="logo-preview" id="logoPreview" hidden>
+                    <img id="logoThumb" alt="Logo">
+                    <span id="logoName"></span>
+                    <button class="chip-x" type="button" id="logoRemove" data-i18n-title="composer.removeLogo">×</button>
+                  </div>
+                  <span class="hint" id="logoHint" data-i18n="composer.logoHint">PNG, JPG, GIF, WEBP ou SVG · 15 Mo max</span>
+                </div>
+                <span class="hint" data-i18n="composer.logoUploadHint">Le logo est joint au message (il peut apparaître en pièce jointe).</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="titleInput" data-i18n="composer.mainTitle">Titre principal</label>
+              <input type="text" id="titleInput" maxlength="160"
+                     data-i18n-placeholder="composer.mainTitlePlaceholder"
+                     placeholder="Le grand titre affiché dans l'e-mail">
+            </div>
+
+            <div class="field">
+              <label for="bodyInput"><span data-i18n="composer.message">Message</span> <span class="req">*</span></label>
+              <textarea id="bodyInput" rows="8" data-i18n-placeholder="composer.messagePlaceholder"></textarea>
+              <span class="hint" data-i18n="composer.messageHint">Les retours à la ligne sont conservés dans l'e-mail.</span>
+            </div>
+
+            <div class="field">
+              <label for="signatureInput" data-i18n="composer.signature">Signature</label>
+              <textarea id="signatureInput" rows="4" data-i18n-placeholder="composer.signaturePlaceholder"></textarea>
+              <span class="hint" data-i18n="composer.signatureHint">La première ligne est mise en gras.</span>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="companyInput" data-i18n="composer.company">Nom de l'entreprise</label>
+                <input type="text" id="companyInput" maxlength="120"
+                       data-i18n-placeholder="composer.companyPlaceholder" placeholder="Ma Société">
+              </div>
+              <div class="field">
+                <label for="accentInput" data-i18n="composer.accent">Couleur de l'e-mail</label>
+                <div class="color-row">
+                  <input type="color" id="accentInput" value="{{ default_accent }}">
+                  <input type="text" id="accentHex" value="{{ default_accent }}" maxlength="7" spellcheck="false">
+                  <div class="swatches" id="swatches">
+                    <button type="button" class="swatch" data-color="#2563eb" style="background:#2563eb" title="#2563eb"></button>
+                    <button type="button" class="swatch" data-color="#0ea5e9" style="background:#0ea5e9" title="#0ea5e9"></button>
+                    <button type="button" class="swatch" data-color="#10b981" style="background:#10b981" title="#10b981"></button>
+                    <button type="button" class="swatch" data-color="#f59e0b" style="background:#f59e0b" title="#f59e0b"></button>
+                    <button type="button" class="swatch" data-color="#ef4444" style="background:#ef4444" title="#ef4444"></button>
+                    <button type="button" class="swatch" data-color="#8b5cf6" style="background:#8b5cf6" title="#8b5cf6"></button>
+                  </div>
+                </div>
+                <span class="hint" data-i18n="composer.accentHint">N'affecte que l'e-mail envoyé, pas l'interface.</span>
+              </div>
+            </div>
+
+            <!-- Bouton d'action : rendu apres le corps du message. -->
+            <div class="field">
+              <label data-i18n="composer.cta">Bouton d'action</label>
+              <div class="grid-2">
+                <div class="field">
+                  <label for="ctaText" data-i18n="composer.ctaText">Texte du bouton</label>
+                  <input type="text" id="ctaText" maxlength="80"
+                         data-i18n-placeholder="composer.ctaTextPlaceholder"
+                         placeholder="Rejoindre maintenant">
+                </div>
+                <div class="field">
+                  <label for="ctaUrl" data-i18n="composer.ctaUrl">Lien du bouton</label>
+                  <input type="url" id="ctaUrl" spellcheck="false"
+                         data-i18n-placeholder="composer.ctaUrlPlaceholder"
+                         placeholder="https://exemple.com/inscription">
+                </div>
+              </div>
+              <span class="hint" data-i18n="composer.ctaHint">Les deux champs sont nécessaires : si l'un manque, aucun bouton n'apparaît.</span>
+            </div>
+
+            <!-- Vignette video cliquable : l'image renvoie vers la video. -->
+            <div class="field">
+              <label data-i18n="composer.video">Vidéo</label>
+              <div class="grid-2">
+                <div class="field">
+                  <label for="videoThumb" data-i18n="composer.videoThumb">Image de la vignette</label>
+                  <input type="url" id="videoThumb" spellcheck="false"
+                         data-i18n-placeholder="composer.videoThumbPlaceholder"
+                         placeholder="https://exemple.com/vignette.jpg">
+                </div>
+                <div class="field">
+                  <label for="videoUrl" data-i18n="composer.videoUrl">Lien de la vidéo</label>
+                  <input type="url" id="videoUrl" spellcheck="false"
+                         data-i18n-placeholder="composer.videoUrlPlaceholder"
+                         placeholder="https://youtube.com/watch?v=…">
+                </div>
+              </div>
+              <span class="hint" data-i18n="composer.videoHint">Un clic sur la vignette ouvre la vidéo dans le navigateur : aucun client de messagerie ne sait lire une vidéo dans le message. Les deux champs sont nécessaires.</span>
+            </div>
+
+            <!-- Reseaux sociaux : pastilles rondes dans le pied de page. -->
+            <div class="field">
+              <label data-i18n="composer.social">Réseaux sociaux</label>
+              <div class="grid-2">
+              <div class="field">
+                <label for="socialInstagram">Instagram</label>
+                <input type="url" id="socialInstagram" spellcheck="false" placeholder="https://instagram.com/…">
+              </div>
+              <div class="field">
+                <label for="socialFacebook">Facebook</label>
+                <input type="url" id="socialFacebook" spellcheck="false" placeholder="https://facebook.com/…">
+              </div>
+              <div class="field">
+                <label for="socialYoutube">YouTube</label>
+                <input type="url" id="socialYoutube" spellcheck="false" placeholder="https://youtube.com/@…">
+              </div>
+              <div class="field">
+                <label for="socialLinkedin">LinkedIn</label>
+                <input type="url" id="socialLinkedin" spellcheck="false" placeholder="https://linkedin.com/company/…">
+              </div>
+              <div class="field">
+                <label for="socialX">X</label>
+                <input type="url" id="socialX" spellcheck="false" placeholder="https://x.com/…">
+              </div>
+              <div class="field">
+                <label for="socialTiktok">TikTok</label>
+                <input type="url" id="socialTiktok" spellcheck="false" placeholder="https://tiktok.com/@…">
+              </div>
+              </div>
+              <span class="hint" data-i18n="composer.socialHint">Seuls les réseaux renseignés apparaissent, en pastilles rondes dans le pied de page de l'e-mail.</span>
+            </div>
+
+            <div class="field">
+              <label data-i18n="composer.attachments">Pièces jointes</label>
+              <div class="upload-row">
+                <button class="btn btn-soft" type="button" id="attachBtn">
+                  <span class="btn-icon">＋</span> <span data-i18n="composer.addFiles">Ajouter des fichiers</span>
+                </button>
+                <input type="file" id="attachInput" multiple hidden>
+              </div>
+              <ul class="attach-list" id="attachList"></ul>
+            </div>
+
+          </div>
+
+          <div class="panel-foot">
+            <div class="send-info">
+              <strong id="sendSummary" data-i18n="send.noRecipient">Aucun destinataire</strong>
+              <span id="sendHint" data-i18n="send.hintNoRecipient">Ajoutez au moins une adresse pour envoyer.</span>
+            </div>
+            <button class="btn btn-primary btn-send" id="sendBtn" type="button">
+              <span class="spinner" hidden></span>
+              <span class="btn-label" data-i18n="send.button">Envoyer</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ---------- Panneau aperçu ---------- -->
+        <div class="panel preview">
+          <div class="preview-head">
+            <div class="preview-title">
+              <span class="live-dot"></span> <span data-i18n="preview.live">Aperçu en direct</span>
+            </div>
+            <div class="preview-tools">
+              <button class="seg is-active" type="button" data-width="full" data-i18n="preview.desktop">Bureau</button>
+              <button class="seg" type="button" data-width="mobile" data-i18n="preview.mobile">Mobile</button>
+              <button class="btn btn-mini" type="button" id="refreshPreview" data-i18n-title="preview.refresh">⟳</button>
+            </div>
+          </div>
+          <div class="preview-meta">
+            <div><span data-i18n="preview.from">De</span><strong id="metaFrom">-</strong></div>
+            <div><span data-i18n="preview.to">À</span><strong id="metaTo">-</strong></div>
+            <div><span data-i18n="preview.subject">Objet</span><strong id="metaSubject">-</strong></div>
+          </div>
+          <div class="preview-stage" id="previewStage">
+            <iframe id="previewFrame" data-i18n-title="preview.frameTitle" title="Aperçu de l'e-mail" sandbox=""></iframe>
+            <div class="preview-loading" id="previewLoading" hidden><span class="spinner"></span></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ------------------- 2. CONTACTS ------------------- -->
+    <section class="view" id="view-contacts">
+      <header class="view-head">
+        <div>
+          <h1 data-i18n="contacts.title">Contacts</h1>
+          <p data-i18n="contacts.subtitle">Gérez votre liste de destinataires et vos groupes.</p>
+        </div>
+        <div class="view-head-actions">
+          <button class="btn btn-soft" type="button" id="importBtn">
+            <span class="spinner" hidden></span>
+            <span class="btn-icon">↑</span> <span class="btn-label" data-i18n="contacts.import">Importer CSV / Excel</span>
+          </button>
+          <input type="file" id="importInput" accept=".csv,.xlsx,.xlsm,.txt,.tsv" hidden>
+        </div>
+      </header>
+
+      <div class="panel">
+        <div class="panel-body">
+          <form class="contact-form" id="contactForm" autocomplete="off">
+            <div class="field">
+              <label for="cName" data-i18n="contacts.name">Nom</label>
+              <input type="text" id="cName" data-i18n-placeholder="contacts.namePlaceholder" placeholder="Jean Martin">
+            </div>
+            <div class="field">
+              <label for="cEmail"><span data-i18n="contacts.email">E-mail</span> <span class="req">*</span></label>
+              <input type="email" id="cEmail" required
+                     data-i18n-placeholder="contacts.emailPlaceholder" placeholder="jean@exemple.com">
+            </div>
+            <div class="field">
+              <label for="cGroup" data-i18n="contacts.group">Groupe</label>
+              <input type="text" id="cGroup" list="groupList"
+                     data-i18n-placeholder="contacts.groupPlaceholder" placeholder="Clients">
+              <datalist id="groupList"></datalist>
+            </div>
+            <button class="btn btn-primary" type="submit">
+              <span class="spinner" hidden></span>
+              <span class="btn-label" data-i18n="contacts.add">Ajouter</span>
+            </button>
+          </form>
+
+          <div class="toolbar">
+            <div class="search">
+              <span class="search-icon">⌕</span>
+              <input type="search" id="contactSearch"
+                     data-i18n-placeholder="contacts.search" placeholder="Rechercher un nom, un e-mail, un groupe…">
+            </div>
+            <select id="contactGroupFilter" class="select-sm">
+              <option value="" data-i18n="contacts.allGroups">Tous les groupes</option>
+            </select>
+            <span class="hint" id="contactStats"></span>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th data-i18n="contacts.name">Nom</th>
+                  <th data-i18n="contacts.email">E-mail</th>
+                  <th data-i18n="contacts.group">Groupe</th>
+                  <th data-i18n="contacts.addedOn">Ajouté le</th>
+                  <th class="col-actions" data-i18n="contacts.actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="contactsBody"></tbody>
+            </table>
+            <div class="empty" id="contactsEmpty" hidden>
+              <strong data-i18n="contacts.emptyTitle">Aucun contact</strong>
+              <span data-i18n-html="contacts.emptyHint">Ajoutez un contact ci-dessus ou importez un fichier CSV / Excel (colonnes : <code>name</code>, <code>email</code>, <code>group</code>).</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------- 3. MODÈLES ------------------- -->
+    <section class="view" id="view-templates">
+      <header class="view-head">
+        <div>
+          <h1 data-i18n="templates.title">Modèles</h1>
+          <p data-i18n="templates.subtitle">Dix mises en page testées sur Gmail, Outlook, Apple Mail et mobile.</p>
+        </div>
+      </header>
+      <div class="template-grid" id="templateGrid"></div>
+    </section>
+
+    <!-- ------------------- 4. PARAMÈTRES ------------------- -->
+    <section class="view" id="view-settings">
+      <header class="view-head">
+        <div>
+          <h1 data-i18n="settings.title">Paramètres</h1>
+          <p data-i18n="settings.subtitle">Configuration du serveur d'envoi. Tout reste stocké sur votre ordinateur.</p>
+        </div>
+      </header>
+
+      <div class="settings-layout">
+        <div class="panel">
+          <div class="panel-body">
+
+            <!-- ---------- Langue ---------- -->
+            <div class="language-row">
+              <div class="language-text">
+                <span class="language-label" data-i18n="settings.language">Langue / Language</span>
+                <span class="hint" data-i18n="settings.languageHint">Change immédiatement toute l'interface.</span>
+              </div>
+              <select id="languageSelect" class="select-sm">
+                {% for item in languages %}
+                <option value="{{ item.code }}"{% if item.code == language %} selected{% endif %}>{{ item.label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- ---------- Thème de l'interface ---------- -->
+            <div class="language-row theme-row">
+              <div class="language-text">
+                <span class="language-label" data-i18n="settings.theme">Thème</span>
+                <span class="hint" data-i18n="settings.themeHint">Couleur d'accentuation de l'interface. Sans effet sur les e-mails.</span>
+              </div>
+              <div class="color-row">
+                <input type="color" id="uiAccentInput" value="{{ ui_accent_color }}">
+                <input type="text" id="uiAccentHex" value="{{ ui_accent_color }}" maxlength="7" spellcheck="false">
+                <div class="swatches" id="uiSwatches">
+                  <button type="button" class="swatch" data-color="#2563eb" style="background:#2563eb" title="#2563eb"></button>
+                  <button type="button" class="swatch" data-color="#0ea5e9" style="background:#0ea5e9" title="#0ea5e9"></button>
+                  <button type="button" class="swatch" data-color="#10b981" style="background:#10b981" title="#10b981"></button>
+                  <button type="button" class="swatch" data-color="#f59e0b" style="background:#f59e0b" title="#f59e0b"></button>
+                  <button type="button" class="swatch" data-color="#ef4444" style="background:#ef4444" title="#ef4444"></button>
+                  <button type="button" class="swatch" data-color="#8b5cf6" style="background:#8b5cf6" title="#8b5cf6"></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="presets">
+              <span class="presets-label" data-i18n="settings.presets">Préréglages</span>
+              <button class="btn btn-soft" type="button" data-preset="gmail">Gmail</button>
+              <button class="btn btn-soft" type="button" data-preset="outlook">Outlook</button>
+              <button class="btn btn-soft" type="button" data-preset="yahoo">Yahoo</button>
+            </div>
+
+            <form class="settings-form" id="settingsForm" autocomplete="off">
+              <div class="grid-2">
+                <div class="field">
+                  <label for="smtpServer"><span data-i18n="settings.server">Serveur SMTP</span> <span class="req">*</span></label>
+                  <input type="text" id="smtpServer" placeholder="smtp.gmail.com" required>
+                </div>
+                <div class="field">
+                  <label for="smtpPort"><span data-i18n="settings.port">Port</span> <span class="req">*</span></label>
+                  <input type="number" id="smtpPort" value="587" min="1" max="65535" required>
+                </div>
+              </div>
+              <div class="grid-2">
+                <div class="field">
+                  <label for="smtpEmail"><span data-i18n="settings.email">Adresse e-mail</span> <span class="req">*</span></label>
+                  <input type="email" id="smtpEmail" required
+                         data-i18n-placeholder="settings.emailPlaceholder" placeholder="vous@gmail.com">
+                </div>
+                <div class="field">
+                  <label for="displayName" data-i18n="settings.displayName">Nom affiché</label>
+                  <input type="text" id="displayName"
+                         data-i18n-placeholder="settings.displayNamePlaceholder" placeholder="Marie Dupont - Ma Société">
+                </div>
+              </div>
+              <div class="field">
+                <label for="smtpPassword"><span data-i18n="settings.password">Mot de passe d'application</span> <span class="req">*</span></label>
+                <input type="password" id="smtpPassword"
+                       data-i18n-placeholder="settings.passwordPlaceholder" placeholder="16 caractères sans espaces">
+                <span class="hint" data-i18n-html="settings.passwordHint">Stocké localement dans <code>data/config.json</code> (encodé en base64).</span>
+              </div>
+
+              <div class="settings-actions">
+                <button class="btn btn-primary" type="submit">
+                  <span class="spinner" hidden></span>
+                  <span class="btn-label" data-i18n="settings.save">Enregistrer</span>
+                </button>
+                <button class="btn btn-soft" type="button" id="testBtn">
+                  <span class="spinner" hidden></span>
+                  <span class="btn-label" data-i18n="settings.test">Tester la connexion</span>
+                </button>
+                <span class="test-result" id="testResult"></span>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <aside class="panel note-panel">
+          <div class="panel-body">
+            <h2 class="note-title" data-i18n="note.title">Mot de passe d'application</h2>
+            <p data-i18n-html="note.intro">Depuis 2022, Gmail, Outlook et Yahoo refusent votre mot de passe habituel pour les applications externes. Il faut créer un <strong>mot de passe d'application</strong> dédié.</p>
+
+            <h3>Gmail</h3>
+            <ol>
+              <li data-i18n-html="note.gmail1">Activez la validation en deux étapes sur votre compte Google.</li>
+              <li data-i18n-html="note.gmail2">Ouvrez <code>myaccount.google.com/apppasswords</code>.</li>
+              <li data-i18n-html="note.gmail3">Créez un mot de passe pour « Autre (nom personnalisé) ».</li>
+              <li data-i18n-html="note.gmail4">Copiez les 16 caractères ici, <strong>sans les espaces</strong>.</li>
+            </ol>
+
+            <h3 data-i18n="note.outlookTitle">Outlook / Microsoft 365</h3>
+            <ol>
+              <li data-i18n-html="note.outlook1">Serveur <code>smtp.office365.com</code>, port <code>587</code>.</li>
+              <li data-i18n-html="note.outlook2">Créez un mot de passe d'application dans la sécurité du compte (la validation en deux étapes doit être active).</li>
+            </ol>
+
+            <h3>Yahoo</h3>
+            <ol>
+              <li data-i18n-html="note.yahoo1">Serveur <code>smtp.mail.yahoo.com</code>, port <code>587</code>.</li>
+              <li data-i18n-html="note.yahoo2">Rubrique « Sécurité du compte » → « Générer un mot de passe d'application ».</li>
+            </ol>
+
+            <p class="note-warn" data-i18n="note.warn">Un envoi vers plus de 50 destinataires d'un coup peut être bloqué par votre fournisseur. L'application espace automatiquement les envois d'une seconde.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== MODALE APERÇU MODÈLE ===================== -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-backdrop" data-close="1"></div>
+  <div class="modal-box">
+    <header class="modal-head">
+      <div>
+        <h2 id="modalTitle" data-i18n="templates.modalTitle">Aperçu</h2>
+        <p id="modalDesc"></p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" type="button" id="modalUse" data-i18n="templates.useThis">Utiliser ce modèle</button>
+        <button class="btn btn-ghost" type="button" data-close="1" data-i18n="templates.close">Fermer</button>
+      </div>
+    </header>
+    <div class="modal-body">
+      <iframe id="modalFrame" data-i18n-title="templates.frameTitle" title="Aperçu du modèle" sandbox=""></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== NOTIFICATIONS ===================== -->
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>window.APP_YEAR = {{ year }};</script>
+<script src="/static/js/app.js?v={{ asset_version }}"></script>
+</body>
+</html>
