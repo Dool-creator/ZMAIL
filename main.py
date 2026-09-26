@@ -537,8 +537,24 @@ def build_cta_block(variables: dict[str, Any], accent: str) -> Markup:
 PLAY_GLYPH = "\u25ba"
 
 
+def video_block_renders(variables: dict[str, Any]) -> bool:
+    """Le bloc video n'apparait que si la vignette ET le lien sont renseignes.
+
+    Condition partagee par le rendu et par l'envoi : sans elle, une vignette
+    televersee sans lien video partait quand meme en piece jointe, referencee
+    par rien, et le destinataire voyait un fichier joint inexplicable.
+    """
+    return bool(
+        str(variables.get("video_thumbnail") or "").strip()
+        and normalize_web_url(variables.get("video_url"))
+    )
+
+
 def build_video_block(
-    variables: dict[str, Any], accent: str, lang: str = DEFAULT_LANGUAGE
+    variables: dict[str, Any],
+    accent: str,
+    lang: str = DEFAULT_LANGUAGE,
+    thumb_src: str = "",
 ) -> Markup:
     """Vignette cliquable avec pastille de lecture par-dessus.
 
@@ -550,7 +566,12 @@ def build_video_block(
     Le triangle est un caractere, pas un dessin : il s'affiche partout, y compris
     la ou un <svg> serait supprime, et prend la couleur de l'e-mail.
     """
-    thumb = normalize_web_url(variables.get("video_thumbnail"))
+    if not video_block_renders(variables):
+        return Markup("")
+    # thumb_src est deja resolu par l'appelant (adresse publique, cid: ou data:).
+    # Sans lui, on retombe sur la variable brute, qui ne peut alors qu'etre une
+    # adresse publique : c'est le cas des apercus de modeles.
+    thumb = thumb_src or normalize_web_url(variables.get("video_thumbnail"))
     url = normalize_web_url(variables.get("video_url"))
     if not thumb or not url:
         return Markup("")
@@ -598,7 +619,7 @@ def plain_text_extras(variables: dict[str, Any], lang: str) -> list[str]:
     if cta_text and cta_url:
         out.append(f"{cta_text} : {cta_url}")
     video_url = normalize_web_url(variables.get("video_url"))
-    if normalize_web_url(variables.get("video_thumbnail")) and video_url:
+    if str(variables.get("video_thumbnail") or "").strip() and video_url:
         out.append(f"{strings['video_link']} : {video_url}")
     links = social_links(variables)
     if links:
@@ -615,6 +636,7 @@ def render_email_html(
     variables: dict[str, Any],
     logo_src: str = "",
     lang: str = DEFAULT_LANGUAGE,
+    video_thumb_src: str = "",
 ) -> str:
     """Rend un modèle d'e-mail avec les variables de l'utilisateur.
 
@@ -641,7 +663,7 @@ def render_email_html(
         "accent_color": accent,
         "social_block": build_social_block(variables, accent),
         "cta_block": build_cta_block(variables, accent),
-        "video_block": build_video_block(variables, accent, code),
+        "video_block": build_video_block(variables, accent, code, video_thumb_src),
         "year": datetime.now().year,
         "lang": code,
         "t": email_strings(code),
@@ -652,6 +674,41 @@ def render_email_html(
         raise HTTPException(
             status_code=404, detail=tr(code, "unknown_template", name=template)
         ) from exc
+
+
+def resolve_inline_image(raw: Any, lang: str) -> tuple[str, str | None, Path | None]:
+    """Resout une image de message vers (src, cid, fichier).
+
+    Une adresse http(s) est utilisee telle quelle et ne coute aucune piece
+    jointe. Tout autre valeur non vide est un nom de fichier televerse : il part
+    en piece jointe inline, reference par un Content-ID. Logo et vignette video
+    partagent ce chemin, pour que leurs deux modes se comportent pareil.
+    """
+    value = str(raw or "").strip()
+    if not value:
+        return "", None, None
+    if value.startswith(("http://", "https://", "data:")):
+        return value, None, None
+    path = resolve_upload(value, lang)
+    cid = make_msgid(domain="emailsender.local")[1:-1]
+    return f"cid:{cid}", cid, path
+
+
+def preview_image_src(raw: Any, lang: str) -> str:
+    """Source d'image pour l'apercu navigateur, autonome.
+
+    Un fichier televerse est encode en data URI : l'apercu se suffit a lui-meme,
+    exactement comme le message recu se suffit de sa piece jointe inline.
+    """
+    value = str(raw or "").strip()
+    if not value:
+        return ""
+    if value.startswith(("http://", "https://", "data:")):
+        return value
+    try:
+        return logo_data_uri(resolve_upload(value, lang))
+    except (HTTPException, OSError):
+        return ""
 
 
 def logo_preview_src(logo: Any) -> str:
@@ -819,11 +876,15 @@ def build_message(
     subject: str,
     html: str,
     text: str,
-    logo_cid: str | None,
-    logo_file: Path | None,
+    inline_images: list[tuple[str, Path]],
     attachments: list[tuple[Path, str]],
 ) -> EmailMessage:
-    """Construit un e-mail multipart (texte + HTML, logo inline, pièces jointes)."""
+    """Construit un e-mail multipart (texte + HTML, images inline, pièces jointes).
+
+    ``inline_images`` porte des couples (Content-ID, fichier) : le logo et la
+    vignette video en mode televersement. Chacun devient une partie
+    ``multipart/related`` referencee par ``cid:`` dans le HTML.
+    """
     message = EmailMessage()
     message["From"] = formataddr((display_name or sender, sender))
     message["To"] = recipient
@@ -834,16 +895,18 @@ def build_message(
     message.set_content(text or " ")
     message.add_alternative(html, subtype="html")
 
-    if logo_file is not None and logo_cid:
-        mime = mimetypes.guess_type(logo_file.name)[0] or "image/png"
+    for cid, image_file in inline_images:
+        if not cid or image_file is None:
+            continue
+        mime = mimetypes.guess_type(image_file.name)[0] or "image/png"
         maintype, _, subtype = mime.partition("/")
         html_part = message.get_payload()[-1]
         html_part.add_related(
-            logo_file.read_bytes(),
+            image_file.read_bytes(),
             maintype=maintype or "image",
             subtype=subtype or "png",
-            cid=f"<{logo_cid}>",
-            filename=logo_file.name,
+            cid=f"<{cid}>",
+            filename=image_file.name,
             disposition="inline",
         )
 
@@ -874,20 +937,24 @@ def send_campaign(
     server, port, sender, password, display_name = validate_smtp_config(config, lang)
     attachment_paths = resolve_attachments(attachments, lang)
 
-    # Logo : un fichier uploadé est intégré au message (cid), une URL est utilisée telle quelle.
-    raw_logo = str(variables.get("logo_url") or "").strip()
-    logo_file: Path | None = None
-    logo_cid: str | None = None
-    logo_src = ""
-    if raw_logo:
-        if raw_logo.startswith(("http://", "https://", "data:")):
-            logo_src = raw_logo
-        else:
-            logo_file = resolve_upload(raw_logo, lang)
-            logo_cid = make_msgid(domain="emailsender.local")[1:-1]
-            logo_src = f"cid:{logo_cid}"
+    # Logo et vignette video : un fichier televerse est integre au message (cid),
+    # une adresse http(s) est utilisee telle quelle et ne coute aucune piece jointe.
+    logo_src, logo_cid, logo_file = resolve_inline_image(variables.get("logo_url"), lang)
+    # La vignette n'est attachee que si le bloc video est effectivement rendu.
+    thumb_src, thumb_cid, thumb_file = "", None, None
+    if video_block_renders(variables):
+        thumb_src, thumb_cid, thumb_file = resolve_inline_image(
+            variables.get("video_thumbnail"), lang
+        )
+    inline_images = [
+        (cid, path)
+        for cid, path in ((logo_cid, logo_file), (thumb_cid, thumb_file))
+        if cid and path is not None
+    ]
 
-    html = render_email_html(template, variables, logo_src=logo_src, lang=lang)
+    html = render_email_html(
+        template, variables, logo_src=logo_src, lang=lang, video_thumb_src=thumb_src
+    )
     text = to_plain_text(
         str(variables.get("title") or ""),
         str(variables.get("body") or ""),
@@ -915,8 +982,7 @@ def send_campaign(
                     subject=subject,
                     html=html,
                     text=text,
-                    logo_cid=logo_cid,
-                    logo_file=logo_file,
+                    inline_images=inline_images,
                     attachments=attachment_paths,
                 )
                 session.send(message)
@@ -1522,15 +1588,16 @@ async def api_preview(
         variables["title"] = samples["title"]
     if not str(variables.get("body") or "").strip():
         variables["body"] = samples["body"]
-    # Logo intégré en base64 : l'aperçu est autonome, exactement comme l'e-mail reçu.
-    raw_logo = str(variables.get("logo_url") or "").strip()
-    src = logo_preview_src(raw_logo)
-    if raw_logo and not raw_logo.startswith(("http://", "https://", "data:")):
-        try:
-            src = logo_data_uri(resolve_upload(raw_logo, lang))
-        except (HTTPException, OSError):
-            src = ""
-    return HTMLResponse(render_email_html(payload.template, variables, logo_src=src, lang=lang))
+    # Images integrees en base64 : l'apercu est autonome, exactement comme
+    # l'e-mail recu l'est grace a ses pieces jointes inline.
+    src = preview_image_src(variables.get("logo_url"), lang)
+    thumb_src = preview_image_src(variables.get("video_thumbnail"), lang)
+    return HTMLResponse(
+        render_email_html(
+            payload.template, variables, logo_src=src, lang=lang,
+            video_thumb_src=thumb_src,
+        )
+    )
 
 
 # ------------------------------- Paramètres -------------------------------- #

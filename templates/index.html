@@ -219,13 +219,43 @@
 
             <!-- Vignette video cliquable : l'image renvoie vers la video. -->
             <div class="field">
-              <label data-i18n="composer.video">Vidéo</label>
+              <div class="label-row">
+                <label data-i18n="composer.video">Vidéo</label>
+                <div class="logo-modes" id="videoThumbModes">
+                  <button class="seg is-active" type="button" data-thumb-mode="url"
+                          data-i18n="composer.logoModeUrl">Adresse web</button>
+                  <button class="seg" type="button" data-thumb-mode="upload"
+                          data-i18n="composer.logoModeUpload">Téléversement</button>
+                </div>
+              </div>
               <div class="grid-2">
                 <div class="field">
-                  <label for="videoThumb" data-i18n="composer.videoThumb">Image de la vignette</label>
-                  <input type="url" id="videoThumb" spellcheck="false"
-                         data-i18n-placeholder="composer.videoThumbPlaceholder"
-                         placeholder="https://exemple.com/vignette.jpg">
+                  <label for="videoThumbUrl" data-i18n="composer.videoThumb">Image de la vignette</label>
+
+                  <!-- Mode « adresse web » : l'image est chargée par le client de messagerie. -->
+                  <div id="videoThumbUrlPane">
+                    <input type="url" id="videoThumbUrl" spellcheck="false"
+                           data-i18n-placeholder="composer.videoThumbPlaceholder"
+                           placeholder="https://exemple.com/vignette.jpg">
+                    <span class="hint" data-i18n="composer.logoUrlHint">L'image est chargée depuis le web : aucune pièce jointe dans l'e-mail.</span>
+                  </div>
+
+                  <!-- Mode « téléversement » : l'image part en pièce jointe intégrée (CID). -->
+                  <div id="videoThumbUploadPane" hidden>
+                    <div class="upload-row">
+                      <button class="btn btn-soft" type="button" id="videoThumbBtn">
+                        <span class="btn-icon">↑</span> <span data-i18n="composer.chooseThumb">Choisir une image</span>
+                      </button>
+                      <input type="file" id="videoThumbInput" accept="image/*" hidden>
+                      <div class="logo-preview" id="videoThumbPreview" hidden>
+                        <img id="videoThumbThumb" alt="">
+                        <span id="videoThumbName"></span>
+                        <button class="chip-x" type="button" id="videoThumbRemove" data-i18n-title="composer.removeThumb">×</button>
+                      </div>
+                      <span class="hint" id="videoThumbFileHint" data-i18n="composer.logoHint">PNG, JPG, GIF, WEBP ou SVG · 15 Mo max</span>
+                    </div>
+                    <span class="hint" data-i18n="composer.videoThumbUploadHint">La vignette est jointe au message (elle peut apparaître en pièce jointe).</span>
+                  </div>
                 </div>
                 <div class="field">
                   <label for="videoUrl" data-i18n="composer.videoUrl">Lien de la vidéo</label>

@@ -103,6 +103,10 @@
       "composer.ctaHint":
         "Les deux champs sont nécessaires : si l'un manque, aucun bouton n'apparaît.",
       "composer.video": "Vidéo",
+      "composer.chooseThumb": "Choisir une image",
+      "composer.removeThumb": "Retirer la vignette",
+      "composer.videoThumbUploadHint":
+        "La vignette est jointe au message (elle peut apparaître en pièce jointe).",
       "composer.videoThumb": "Image de la vignette",
       "composer.videoUrl": "Lien de la vidéo",
       "composer.videoThumbPlaceholder": "https://exemple.com/vignette.jpg",
@@ -202,6 +206,7 @@
 
       /* -- Fichiers ------------------------------------------------------- */
       "files.logoAdded": "Logo ajouté.",
+      "files.thumbAdded": "Vignette ajoutée.",
       "files.attachmentsAdded": "{count} pièce(s) jointe(s) ajoutée(s).",
 
       /* -- Vue Modèles ---------------------------------------------------- */
@@ -355,6 +360,10 @@
       "composer.ctaHint":
         "Both fields are required: if either is missing, no button is rendered.",
       "composer.video": "Video",
+      "composer.chooseThumb": "Choose an image",
+      "composer.removeThumb": "Remove thumbnail",
+      "composer.videoThumbUploadHint":
+        "The thumbnail travels with the message (it may show as an attachment).",
       "composer.videoThumb": "Thumbnail image",
       "composer.videoUrl": "Video link",
       "composer.videoThumbPlaceholder": "https://example.com/thumbnail.jpg",
@@ -452,6 +461,7 @@
 
       /* -- Files ---------------------------------------------------------- */
       "files.logoAdded": "Logo added.",
+      "files.thumbAdded": "Thumbnail added.",
       "files.attachmentsAdded": "{count} attachment(s) added.",
 
       /* -- Templates view ------------------------------------------------- */

@@ -28,6 +28,8 @@
     recipients: [],       // [{ email, name }]
     logo: null,           // mode « téléversement » : { filename, url, original_name }
     logoMode: "url",      // « url » (image distante) ou « upload » (pièce jointe CID)
+    videoThumb: null,     // mode « téléversement » : { filename, url, original_name }
+    videoThumbMode: "url",// mêmes deux modes que le logo
     attachments: [],      // [{ filename, original_name, size }]
     config: null,
     template: "",
@@ -463,11 +465,16 @@
     return state.logo ? state.logo.filename : "";
   }
 
+  /** Même logique que currentLogo() : la valeur dépend du mode actif. */
+  function currentVideoThumb() {
+    if (state.videoThumbMode === "url") return $("#videoThumbUrl").value.trim();
+    return state.videoThumb ? state.videoThumb.filename : "";
+  }
+
   // Champs des blocs optionnels : id du champ -> nom de la variable de modele.
   const OPTIONAL_FIELDS = {
     ctaText: "cta_text",
     ctaUrl: "cta_url",
-    videoThumb: "video_thumbnail",
     videoUrl: "video_url",
     socialInstagram: "social_instagram",
     socialFacebook: "social_facebook",
@@ -485,6 +492,7 @@
       signature: $("#signatureInput").value,
       company_name: $("#companyInput").value,
       accent_color: currentAccent(),
+      video_thumbnail: currentVideoThumb(),
     };
     Object.keys(OPTIONAL_FIELDS).forEach(function (id) {
       const el = document.getElementById(id);
@@ -597,6 +605,32 @@
     if (!(options && options.silent)) schedulePreview();
   }
 
+  /** Affiche le panneau du mode choisi pour la vignette et rafraîchit l'aperçu. */
+  function setVideoThumbMode(mode, options) {
+    const next = mode === "upload" ? "upload" : "url";
+    state.videoThumbMode = next;
+    $$("#videoThumbModes .seg").forEach((button) =>
+      button.classList.toggle("is-active", button.dataset.thumbMode === next)
+    );
+    $("#videoThumbUrlPane").hidden = next !== "url";
+    $("#videoThumbUploadPane").hidden = next !== "upload";
+    if (!(options && options.silent)) schedulePreview();
+  }
+
+  function renderVideoThumb() {
+    const box = $("#videoThumbPreview");
+    if (!state.videoThumb) {
+      box.hidden = true;
+      $("#videoThumbFileHint").hidden = false;
+      return;
+    }
+    box.hidden = false;
+    $("#videoThumbFileHint").hidden = true;
+    $("#videoThumbThumb").src = state.videoThumb.url;
+    $("#videoThumbName").textContent =
+      state.videoThumb.original_name || state.videoThumb.filename;
+  }
+
   function renderLogo() {
     const box = $("#logoPreview");
     if (!state.logo) {
@@ -677,6 +711,50 @@
     $("#logoRemove").addEventListener("click", () => {
       state.logo = null;
       renderLogo();
+      schedulePreview();
+    });
+
+    // Vignette vidéo : mêmes gestes que le logo, même chemin d'aperçu.
+    $$("#videoThumbModes .seg").forEach((button) => {
+      button.addEventListener("click", () => setVideoThumbMode(button.dataset.thumbMode));
+    });
+
+    $("#videoThumbUrl").addEventListener("input", schedulePreview);
+    $("#videoThumbUrl").addEventListener("change", (event) => {
+      const url = event.target.value.trim();
+      if (url && !/^https?:\/\/\S+$/i.test(url)) {
+        toast(t("composer.logoUrlInvalid"), "warn");
+      }
+    });
+
+    $("#videoThumbBtn").addEventListener("click", () => $("#videoThumbInput").click());
+
+    $("#videoThumbInput").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      event.target.value = "";
+      if (!file) return;
+      const button = $("#videoThumbBtn");
+      button.disabled = true;
+      try {
+        const result = await uploadFile(file, "logo");
+        state.videoThumb = {
+          filename: result.filename,
+          url: result.url,
+          original_name: result.original_name,
+        };
+        renderVideoThumb();
+        schedulePreview();
+        toast(t("files.thumbAdded"), "ok");
+      } catch (error) {
+        toast(error.message, "err");
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $("#videoThumbRemove").addEventListener("click", () => {
+      state.videoThumb = null;
+      renderVideoThumb();
       schedulePreview();
     });
 
@@ -860,18 +938,25 @@
       if (!window.confirm(t("composer.resetConfirm"))) return;
       state.recipients = [];
       state.logo = null;
+      state.videoThumb = null;
       state.attachments = [];
-      ["#subject", "#titleInput", "#bodyInput", "#signatureInput", "#companyInput"].forEach(
-        (selector) => ($(selector).value = "")
-      );
+      // #logoUrlInput n'est volontairement pas vidé : cette adresse est
+      // mémorisée dans la configuration et réinjectée au démarrage. La vignette
+      // vidéo, elle, n'est pas mémorisée, donc elle se vide comme le reste.
+      [
+        "#subject", "#titleInput", "#bodyInput", "#signatureInput",
+        "#companyInput", "#videoThumbUrl",
+      ].forEach((selector) => ($(selector).value = ""));
       // Les blocs optionnels se vident aussi : « Réinitialiser » doit rendre
       // un formulaire reellement vierge, pas seulement ses champs d'origine.
       Object.keys(OPTIONAL_FIELDS).forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.value = "";
       });
+      setVideoThumbMode("url", { silent: true });
       renderRecipients();
       renderLogo();
+      renderVideoThumb();
       renderAttachments();
       schedulePreview();
       toast(t("composer.resetDone"), "info");
@@ -1496,9 +1581,11 @@
     applyUiAccent(document.documentElement.getAttribute("data-ui-accent"));
     // Mode « adresse web » par défaut : l'e-mail ne porte alors aucune pièce jointe.
     setLogoMode("url", { silent: true });
+    setVideoThumbMode("url", { silent: true });
     renderRecipients();
     renderAttachments();
     renderLogo();
+    renderVideoThumb();
 
     await Promise.all([loadConfig(), loadTemplates(), loadContacts()]);
     refreshPreview();
