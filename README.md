@@ -32,6 +32,17 @@ pip install -r requirements.txt
 ```
 
 ```bash
+# ou, si « pip » n'est pas reconnu :
+python -m pip install -r requirements.txt
+```
+
+La seconde forme est la plus sûre : elle installe les dépendances dans
+l'installation Python qui s'exécute réellement, alors que `pip` seul dépend du
+PATH et peut manquer ou viser un autre interpréteur. Utilisez-la si la première
+commande répond que `pip` n'est pas reconnu, ce qui arrive couramment sous
+Windows.
+
+```bash
 python main.py
 ```
 
